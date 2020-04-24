@@ -968,6 +968,7 @@ inline std::string reflect(jitify::reflection::Instance<T>& value) {
  */
 template <typename T>
 inline Type<T> type_of(T& value) {
+  (void) value;
   return Type<T>();
 }
 /*! Create a Type object representing a value's type.
@@ -1137,7 +1138,7 @@ class CUDAKernel {
       cuda_safe_call(cuLinkCreate((unsigned)_opts.size(), _opts.data(),
                                   _optvals.data(), &_link_state));
       cuda_safe_call(cuLinkAddData(_link_state, CU_JIT_INPUT_PTX,
-                                   (void*)_ptx.c_str(), _ptx.size(),
+                                   static_cast<void *>(const_cast<char *>(_ptx.c_str())), _ptx.size(),
                                    "jitified_source.ptx", 0, 0, 0));
       for (int i = 0; i < (int)link_files.size(); ++i) {
         std::string link_file = link_files[i];
@@ -3208,6 +3209,7 @@ inline CUresult KernelLauncher_impl::launch(
             << ">>>"
             << "(" << arg_types_string << ")" << std::endl;
 #endif
+  (void) arg_types;
   if (!_kernel_inst._cuda_kernel) {
     throw std::runtime_error(
         "Kernel pointer is NULL; you may need to define JITIFY_THREAD_SAFE 1");
@@ -4033,6 +4035,7 @@ class KernelLauncher {
               << _stream << ">>>"
               << "(" << arg_types_string << ")" << std::endl;
 #endif
+    (void) arg_types;
     return _kernel_inst->_cuda_kernel->launch(_grid, _block, _smem, _stream,
                                               arg_ptrs);
   }
